@@ -1,0 +1,99 @@
+<html>
+<head>
+    <link href="multiple-select.css" rel="stylesheet"/>
+    <link href="custom.css" rel="stylesheet"/>
+    <script type="text/javascript" src="jquery-2.0.3.min.js"></script>
+    
+</head>
+<body>
+    <p id="eventResult">Here is the result of event.</p>
+    <p id="currentFilter"></p>
+    <div id="outer" style="display:table">
+        <div id="selector" style="display:table-cell">
+            <select multiple="multiple" >
+                    <option value="1:Group1">Group1</option>
+                    <option value="2:Group2">Group2</option>
+                    <option value="3:Group3">Group3</option>
+                    <option value="4:Group4">Group4</option>
+                    <option value="5:Group5">Group5</option>
+                    <option value="6:Group6">Group6</option>
+                    <option value="7:Group7">Group7</option>
+                    <option value="8:Group8">Group8</option>
+                    <option value="9:Group9">Group9</option>
+                    <option value="10:Group10">Group10</option>
+                    <option value="11:Group11">Group11</option>
+            </select>
+        </div>
+        <div id="buttons" style="display:table-cell;"></div>
+    </div>
+
+    <script src="multiple-select.js"></script>
+    <script>
+        var buttonState = {};
+
+        function toggleFilter(id) {
+            var state = buttonState[id];
+            buttonState[id] = !state;
+        };
+
+        $("select").multipleSelect({
+            placeholder: "Choose options",
+            width: 200,
+            onOpen: function() {
+                $("#eventResult").text('Select opened!');
+            },
+            onClose: function() {
+                buttonState = {};
+                $("#eventResult").text('Select closed!');
+                var values = $("select").multipleSelect("getSelects");
+                $("#buttons").empty();
+                
+                $.each( values, function( key, value ) {
+                    var $input = $('<input type="button" />');
+                    var idPos = value.indexOf(':');
+                    var groupName = value.substring(idPos+1);
+                    var groupId = value.substring(0, idPos);
+                    $input.attr("id",value);
+                    $input.attr("value",groupName);
+                    $input.data("groupid",groupId);
+                    $input.addClass('green')
+                    $input.click(function(){
+                        $(this).toggleClass('gray');
+                        toggleFilter($(this).data("groupid"));
+                        $("#currentFilter").text(JSON.stringify(buttonState));
+                    });
+                    $input.appendTo($("#buttons"));
+                    buttonState[groupId]=true;
+
+                });
+
+                $("#currentFilter").text(JSON.stringify(buttonState));
+
+            },
+            onCheckAll: function() {
+                $("#eventResult").text('Check all clicked!');
+            },
+            onUncheckAll: function() {
+                $("#eventResult").text('Uncheck all clicked!');
+            },
+            onFocus: function() {
+                $("#eventResult").text('focus!');
+            },
+            onBlur: function() {
+                $("#eventResult").text('blur!');
+            },
+            onOptgroupClick: function(view) {
+                var values = $.map(view.children, function(child){
+                    return child.value;
+                }).join(', ');
+                $("#eventResult").text('Optgroup ' + view.label + ' ' + 
+                    (view.checked ? 'checked' : 'unchecked') + ': ' + values);
+            },
+            onClick: function(view) {
+                $("#eventResult").text(view.label + '(' + view.value + ') ' + 
+                    (view.checked ? 'checked' : 'unchecked'));
+            }
+        });
+    </script>
+</body>
+</html>
